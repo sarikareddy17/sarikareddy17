@@ -1,0 +1,79 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: dms-service-webservice-qa
+  namespace: XX_NAMESPACE_XX
+spec:
+  selector:
+    matchLabels:
+      app: dms-service-webservice-qa
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+        maxSurge: 1
+        maxUnavailable: 10%
+  replicas: 2
+  template: # create pods using pod definition in this template
+    metadata:
+      namespace: XX_NAMESPACE_XX
+      labels:
+        app: dms-service-webservice-qa
+    spec:
+      containers:
+      - name: dms-service-webservice-qa
+        image: dmsdevcontainerregistry.azurecr.io/dms-service-webservice-qa:XX_IMAGETAG_XX
+#################probe config#################
+        livenessProbe:
+          httpGet:
+            path: /api/dms/services/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 4
+          failureThreshold: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /api/dms/services/health
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 4
+          failureThreshold: 3
+          successThreshold: 1
+        startupProbe:
+          httpGet:
+            path: /api/dms/services/health
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 5
+          timeoutSeconds: 4
+          failureThreshold: 20
+          successThreshold: 1  
+#################probe config#################
+#################resources####################
+        resources:
+          requests: 
+            memory: 500Mi
+      #      cpu: 256m
+      #    limits: 
+      #      memory: 1024Mi
+      #      cpu: 512m 
+#################resources####################
+       # readinessProbe:
+       #  httpGet:
+        #    path: /api/dms/services/health
+         #   port: 8080
+          #initialDelaySeconds: 30
+          #periodSeconds: 30
+          #timeoutSeconds: 5
+        #startupProbe:
+         # httpGet:
+          #  path: /api/dms/services/health
+           # port: 8080
+          #initialDelaySeconds: 45
+          #timeoutSeconds: 5
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+        - name:  acr-secret

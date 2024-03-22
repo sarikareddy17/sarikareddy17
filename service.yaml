@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: dms-services-service
+  namespace: XX_NAMESPACE_XX
+spec:
+  selector:
+    app: dms-service-webservice-qa
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8080
